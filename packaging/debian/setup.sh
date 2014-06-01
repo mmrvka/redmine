@@ -10,6 +10,8 @@ cat > config/database.yml <<EOF
 # PostgreSQL configuration example
 production:
   adapter: postgresql
+mysql:
+  adapter: mysql2
 EOF
 
 sudo service postgresql start
