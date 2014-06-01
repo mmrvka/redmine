@@ -58,13 +58,30 @@ module Redmine
           end
         end
 
+        # Overwrite email delivery config if SMTP_URL is present
+        if ENV['SMTP_URL']
+          smtp_uri = URI.parse(ENV['SMTP_URL'])
+          ActionMailer::Base.perform_deliveries = true
+          ActionMailer::Base.delivery_method = :smtp
+          ActionMailer::Base.smtp_settings = {
+            address: smtp_uri.host,
+            port: smtp_uri.port || 25,
+            domain: smtp_uri.path.gsub(/^\//, ''),
+            authentication: :login,
+            user_name: smtp_uri.user,
+            password: smtp_uri.password
+          }
+        end
+
         @config
       end
 
       # Returns a configuration setting
       def [](name)
-        load unless @config
-        @config[name]
+        ENV.fetch(name.upcase) do
+          load unless @config
+          @config[name]
+        end
       end
 
       # Yields a block with the specified hash configuration settings
